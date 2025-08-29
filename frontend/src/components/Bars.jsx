@@ -4,7 +4,7 @@ import { usePlayer } from "../context/PlayerContext";
 function SideBar() {
   const image = HarmonyLogo;
   return (
-    <div className="w-full h-full bg-[#ffffffc9] backdrop-blur-lg flex flex-row  md:flex-col md:justify-between md:items-center justify-between items-center rounded-lg px-1 md:py-2 font-poppins">
+    <div className="w-full h-full md:bg-[#ffffffa1] bg-transparent backdrop-blur-lg flex flex-row  md:flex-col md:justify-between md:items-center justify-between items-center rounded-lg px-1 md:py-2 font-poppins">
       <div className="w-[105px] h-[33px] md:w-[205px] md:h-[65px] mt-2">
         <img src={image} className="w-full h-full object-fill object-center" />
       </div>
@@ -48,7 +48,12 @@ function SideBar() {
   );
 }
 
-function fmt(sec) {
+
+function PlayingNow() {
+
+
+
+  function fmt(sec) {
   if (!sec) return "0:00";
   const m = Math.floor(sec / 60);
   const s = Math.floor(sec % 60)
@@ -60,7 +65,8 @@ function pct(progress, duration) {
   if (!duration || Number.isNaN(duration)) return 0;
   return Math.min(100, Math.max(0, (progress / duration) * 100));
 }
-function PlayingNow() {
+
+
   const {
     current,
     isPlaying,
@@ -89,8 +95,8 @@ function PlayingNow() {
           alt={current?.title || "cover"}
           className="w-10 h-10 md:w-12 md:h-12 rounded-md object-cover ring-1 ring-black/10"
         />
-        <div className="min-w-0">
-          <div className="truncate font-medium text-sm md:text-base">
+        <div className="min-w-0 w-2/5">
+          <div className="truncate font-medium text-sm md:text-base ">
             {current?.title || "Nothing playing"}
           </div>
           <div className="truncate text-[11px] md:text-xs text-neutral-600 ">
@@ -98,7 +104,7 @@ function PlayingNow() {
           </div>
         </div>
       </div>
-      <div className="flex-1 min-w-[140px]">
+      <div className="flex-1 min-w-3/5">
         <div className="relative mb-2">
           <div className="h-1 w-full rounded-full bg-black/10  overflow-hidden">
             <div

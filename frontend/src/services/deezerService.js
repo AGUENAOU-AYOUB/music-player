@@ -36,9 +36,9 @@ async function getPopularAlbums() {
 
 //Searching tracks and artists and albums by query
 
-async function search(query) {
+async function search(query, index = 0, limit = 10) {
   try {
-    const response = await deezerApi.get("/search", { params: { q: query } });
+    const response = await deezerApi.get("/search", { params: { q: query, index, limit } });
     return response.data;
   } catch (error) {
     console.log(error);

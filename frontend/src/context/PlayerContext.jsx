@@ -15,33 +15,54 @@ export function PlayerProvider({ children }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [recent, setRecent] = useState([]);
+  const [volume, setVolume] = useState(1);
 
   async function playTrack(track) {
-    const next = {
-      id: track.id,
-      title: track.title,
-      artist: track.artist?.name,
-      cover: track.album?.cover_medium,
-      previewUrl: track.preview,
-    };
-    if (!next.previewUrl) {
-      console.warn("no preview URL on this track ");
-      return;
+    const previewUrl = track?.preview ?? track?.previewUrl ?? track?.audioUrl;
+   
+  if (!previewUrl) {
+    console.warn("This item has no preview/audio URL:", track);
+    return;
+  }
+   const next = {
+    id: track?.id,
+    title: track?.title,
+    artist: track?.artist?.name ?? track?.artist, 
+    cover: track?.album?.cover_medium ?? track?.cover,
+    previewUrl, 
+  };
+   
+
+    if (current?.id === next.id) {
+      return togglePlay();
     }
 
     setCurrent(next);
+    setIsPlaying(false);
+    setProgress(0);
+    setDuration(0);
+
+     setRecent(prev => {
+    const filtered = prev.filter(item => item.id !== next.id);
+    return [next, ...filtered].slice(0, 20);
+  });
+
 
     const audio = audioRef.current;
-    audio.src = next.previewUrl;
 
     try {
+      audio.pause();
+      audio.currentTime = 0;
+      audio.src = previewUrl;
+
       await audio.play();
       setIsPlaying(true);
     } catch (e) {
+      console.error("play() failed:", e);
       setIsPlaying(false);
     }
   }
-
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -65,8 +86,13 @@ export function PlayerProvider({ children }) {
     const audio = audioRef.current;
     if (!current) return;
     if (audio.paused) {
-      await audio.play();
-      setIsPlaying(true);
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch (e) {
+        console.error("togglePlay play() failed:", e);
+        setIsPlaying(false);
+      }
     } else {
       audio.pause();
       setIsPlaying(false);
@@ -75,17 +101,31 @@ export function PlayerProvider({ children }) {
 
   function seekTo(sec) {
     const audio = audioRef.current;
-    audio.currentTime = sec;
+    const safe = Math.max(0, Math.min(sec, duration || 0));
+    audio.currentTime = safe;
     setProgress(sec);
   }
-  const [volume, setVolume] = useState(1);
-  useEffect(()=>{
-    audioRef.current.volume = volume
-  }, [volume])
 
-  const value = { audioRef,
-  current, isPlaying, progress, duration, volume,
-  setVolume, playTrack, togglePlay, seekTo};
+  useEffect(() => {
+    audioRef.current.volume = volume;
+  }, [volume]);
+
+  const value = useMemo(
+    () => ({
+      audioRef,
+      current,
+      isPlaying,
+      progress,
+      duration,
+      volume,
+      setVolume,
+      playTrack,
+      togglePlay,
+      seekTo,
+      recent,
+    }),
+    [current, isPlaying, progress, duration, volume, recent]
+  );
   return (
     <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>
   );
