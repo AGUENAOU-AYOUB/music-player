@@ -17,6 +17,21 @@ export function PlayerProvider({ children }) {
   const [duration, setDuration] = useState(0);
   const [recent, setRecent] = useState([]);
   const [volume, setVolume] = useState(1);
+ const [favorite, setFavorite] = useState(() => {
+  try {
+    const raw = localStorage.getItem("favorites");
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+});
+
+useEffect(() => {
+  try {
+    localStorage.setItem("favorites", JSON.stringify(favorite));
+  } catch {}
+}, [favorite]);
+
 
   async function playTrack(track) {
     const previewUrl = track?.preview ?? track?.previewUrl ?? track?.audioUrl;
@@ -110,22 +125,46 @@ export function PlayerProvider({ children }) {
     audioRef.current.volume = volume;
   }, [volume]);
 
-  const value = useMemo(
-    () => ({
-      audioRef,
-      current,
-      isPlaying,
-      progress,
-      duration,
-      volume,
-      setVolume,
-      playTrack,
-      togglePlay,
-      seekTo,
-      recent,
-    }),
-    [current, isPlaying, progress, duration, volume, recent]
-  );
+
+  function isFav(id) {
+  return favorite.some(f => f.id === id);
+}
+
+function addFavorite(track) {
+  
+  const previewUrl = track?.preview ?? track?.previewUrl ?? track?.audioUrl;
+  const next = {
+    id: track?.id,
+    title: track?.title,
+    artist: track?.artist?.name ?? track?.artist,
+    cover: track?.album?.cover_medium ?? track?.cover,
+    previewUrl,
+  };
+  setFavorite(prev => {
+    if (prev.some(f => f.id === next.id)) return prev; 
+    return [next, ...prev];
+  });
+}
+
+function removeFavorite(id) {
+  setFavorite(prev => prev.filter(f => f.id !== id));
+}
+
+function toggleFavorite(track) {
+  if (!track?.id) return;
+  isFav(track.id) ? removeFavorite(track.id) : addFavorite(track);
+}
+
+ const value = useMemo(() => ({
+  audioRef,
+  current, isPlaying,
+  progress, duration,
+  volume, setVolume,
+  playTrack, togglePlay, seekTo,
+  recent,
+  favorite, isFav, addFavorite, removeFavorite, toggleFavorite,  
+}), [current, isPlaying, progress, duration, volume, recent, favorite]);
+
   return (
     <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>
   );

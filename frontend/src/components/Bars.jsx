@@ -1,6 +1,7 @@
 import HarmonyLogo from "../assets/HarmonyLogo.png";
 import { Link } from "react-router-dom";
 import { usePlayer } from "../context/PlayerContext";
+import { FavoriteButton } from "./Cards";
 function SideBar() {
   const image = HarmonyLogo;
   return (
@@ -48,24 +49,19 @@ function SideBar() {
   );
 }
 
-
 function PlayingNow() {
-
-
-
   function fmt(sec) {
-  if (!sec) return "0:00";
-  const m = Math.floor(sec / 60);
-  const s = Math.floor(sec % 60)
-    .toString()
-    .padStart(2, "0");
-  return `${m}:${s}`;
-}
-function pct(progress, duration) {
-  if (!duration || Number.isNaN(duration)) return 0;
-  return Math.min(100, Math.max(0, (progress / duration) * 100));
-}
-
+    if (!sec) return "0:00";
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60)
+      .toString()
+      .padStart(2, "0");
+    return `${m}:${s}`;
+  }
+  function pct(progress, duration) {
+    if (!duration || Number.isNaN(duration)) return 0;
+    return Math.min(100, Math.max(0, (progress / duration) * 100));
+  }
 
   const {
     current,
@@ -76,7 +72,10 @@ function pct(progress, duration) {
     setVolume,
     togglePlay,
     seekTo,
+    isFav, toggleFavorite, 
   } = usePlayer();
+  
+  const favActive = current?.id ? isFav(current.id) : false;
 
   return (
     <div
@@ -177,13 +176,19 @@ function pct(progress, duration) {
           />
         </div>
 
-        <button
+        <div className="flex items-center gap-2">
+           <button
           type="button"
-          className="p-2 rounded hover:bg-black/5 "
-          aria-label="Like"
+          disabled={!current}
+          onClick={() => current && toggleFavorite(current)}
+          aria-pressed={favActive}
+          aria-label={favActive ? "Remove from favorites" : "Add to favorites"}
+          className={`p-2 rounded hover:bg-black/5 dark:hover:bg-white/10 ${!current ? "opacity-50 cursor-not-allowed" : ""}`}
+          title={favActive ? "Unfavorite" : "Favorite"}
         >
-          <i className="fa-regular fa-heart text-base"></i>
+          <i className={`fa-${favActive ? "solid" : "regular"} fa-heart ${favActive ? "text-red-500" : ""}`}></i>
         </button>
+        </div>
       </div>
     </div>
   );

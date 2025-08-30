@@ -215,10 +215,32 @@ function AlbumCard({ album }) {
     </div>
   );
 }
+
+
+
+function FavoriteButton({ track, className = "" }) {
+  const { isFav, toggleFavorite } = usePlayer();
+  const active = isFav(track.id);
+
+  return (
+    <button
+      type="button"
+      onClick={() => toggleFavorite(track)}
+      aria-pressed={active}
+      className={`p-2 rounded hover:bg-black/5 ${className}`}
+      title={active ? "Remove from favorites" : "Add to favorites"}
+    >
+      <i className={`fa-${active ? "solid" : "regular"} fa-heart ${active ? "text-red-500" : ""}`} />
+    </button>
+  );
+}
+
+
 export {
   TrackCardVertical,
   TrackCardHorizontal,
   ArtistCard,
   AlbumCard,
   SearchRes,
+  FavoriteButton
 };

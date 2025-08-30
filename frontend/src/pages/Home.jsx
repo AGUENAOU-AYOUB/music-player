@@ -92,9 +92,9 @@ function Home() {
             setResults([]);
             setQuery('');
           }}
-          className="w-10 h-10 absolute top-3 group items-center flex"
+          className="right-5 p-2 border-black rounded-lg sticky border-2 top-3 group items-center hover:scale-110  flex"
         >
-          <i class="fa-solid fa-x group-hover:scale-11 0 group-hover:shadow-md transition-all duration-500 ease-in-out"></i>
+          <i className="fa-solid fa-x    group-hover:shadow-lg transition-all duration-500 ease-in-out"></i>
         </div>
         {results && (
           <div className="w-full  flex flex-col px-2 mt-1  ">
